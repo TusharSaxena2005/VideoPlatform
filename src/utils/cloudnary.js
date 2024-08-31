@@ -24,3 +24,6 @@ const cloudnaryUpload = async (localPath) => {
         return null;
     }
 }
+
+
+export { cloudnaryUpload }
