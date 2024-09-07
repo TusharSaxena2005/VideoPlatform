@@ -1,12 +1,11 @@
 import { asyncHandler } from "../utils/asyncHandler.js"
 import { ApiError } from "../utils/apiError.js"
-import { User } from "../models/user.model"
+import { User } from "../models/user.model.js"
 import { cloudnaryUpload } from "../utils/cloudnary.js"
 import { ApiResponse } from "../utils/apiResponse.js"
 
 const registerUser = asyncHandler(async (req, res) => {
     const { fullName, username, email, password } = req.body;
-    console.log("email:", email)
 
     if (
         [fullName, username, email, password].some((field) =>
@@ -24,12 +23,14 @@ const registerUser = asyncHandler(async (req, res) => {
     }
 
     const avatarLocalPath = req.files?.avatar[0]?.path;
-    const coverImageLocalPath = req.files?.coverImage[0]?.path;
+    let coverImageLocalPath;
+    if (req.files && Array.isArray(req.files.coverImage) && req.files.coverImage[0] > 0) {
+        coverImageLocalPath = req.files.coverImage[0].path
+    }
 
     if (!avatarLocalPath) {
         throw new ApiError(400, "Avatar is required")
     }
-
     const avatar = await cloudnaryUpload(avatarLocalPath);
     const coverImage = await cloudnaryUpload(coverImageLocalPath);
 
@@ -46,7 +47,7 @@ const registerUser = asyncHandler(async (req, res) => {
         password
     })
 
-    const userCreated = User.findById(user._id).select(
+    const userCreated = await User.findById(user._id).select(
         "-password -refreshToken"
     )
 
@@ -55,7 +56,7 @@ const registerUser = asyncHandler(async (req, res) => {
     }
 
     return res.status(201).json(
-        new ApiResponse(200,userCreated,"user registered Successfully")
+        new ApiResponse(200, userCreated, "user registered Successfully")
     )
 
 })
