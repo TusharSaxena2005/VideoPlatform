@@ -9,7 +9,7 @@ const generateAccessAndRefreshToken = async (userId) => {
         const user = await User.findById(userId)
         const accessToken = user.generateAccessToken()
         const refreshToken = user.generateRefreshToken()
-
+        
         user.refreshToken = refreshToken
         await user.save({ validateBeforeSave: false })
 
@@ -77,9 +77,9 @@ const registerUser = asyncHandler(async (req, res) => {
 
 })
 
-const loginUser = asyncHandler(async () => {
+const loginUser = asyncHandler(async (req, res) => {
     const { username, email, password } = req.body
-    if (!username || !email) {
+    if (!(username || email)) {
         throw new ApiError(400, "username and email are required")
     }
 
@@ -121,7 +121,7 @@ const loginUser = asyncHandler(async () => {
         )
 })
 
-const loggedOut = asyncHandler(async () => {
+const loggedOut = asyncHandler(async (req, res) => {
     await User.findByIdAndUpdate(
         req.user._id,
         {
@@ -140,10 +140,10 @@ const loggedOut = asyncHandler(async () => {
     }
 
     return res
-    .status(200)
-    .clearCookie("accessToken",options)
-    .clearCookie("refreshToken",options)
-    .json(new ApiResponse(200 , {} , "User logged out Successfully"))
+        .status(200)
+        .clearCookie("accessToken", options)
+        .clearCookie("refreshToken", options)
+        .json(new ApiResponse(200, {}, "User logged out Successfully"))
 })
 
 export { registerUser, loginUser, loggedOut }
