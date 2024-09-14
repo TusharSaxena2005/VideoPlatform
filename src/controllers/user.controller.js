@@ -4,6 +4,7 @@ import { User } from "../models/user.model.js"
 import { cloudnaryUpload } from "../utils/cloudnary.js"
 import { ApiResponse } from "../utils/apiResponse.js"
 import jwt from "jsonwebtoken"
+import mongoose from "mongoose"
 
 const generateAccessAndRefreshToken = async (userId) => {
     try {
@@ -372,6 +373,57 @@ const getChannelProfile = asyncHandler(async (req, res) => {
     )
 })
 
+const userWatchHistory = asyncHandler(async (req, res)=>{
+    const user = await User.aggregate([
+        {
+            $match: {
+                _id:new mongoose.Types.ObjectId(req.user._id)
+
+            }
+        },
+        {
+            $lookup:{
+                from: 'videos',
+                localField: 'watchHistory',
+                foreignField: '_id',
+                as: 'watchHistory',
+                pipeline:[
+                    {
+                        $lookup:{
+                            from: 'user',
+                            localField: 'owner',
+                            foreignField: '_id',
+                            as: 'owner',
+                            pipeline:[
+                                {
+                                    $project:{
+                                        fullName:1,
+                                        username:1,
+                                        avatar:1
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        $addFields:{
+                            owner:{
+                                $first:"$owner"
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+    ])
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(200,user[0].watchHistory,"User watch history done")
+    )
+})
+
 export {
     registerUser,
     loginUser,
@@ -382,5 +434,6 @@ export {
     updateAccount,
     updateUserAvatar,
     updateUserCoverImage,
-    getChannelProfile
+    getChannelProfile,
+    userWatchHistory
 }
