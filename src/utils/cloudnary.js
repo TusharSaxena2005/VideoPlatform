@@ -26,5 +26,12 @@ const cloudnaryUpload = async (localPath) => {
     }
 }
 
+const cloudnaryDelete = async (localPath) => {
+    cloudinary.uploader.destroy(localPath, function (result) { 
+        console.log(localPath)
+        console.log("Image successfully deletd from cloudnary")
+     });
+}
 
-export { cloudnaryUpload }
+
+export { cloudnaryUpload, cloudnaryDelete }
