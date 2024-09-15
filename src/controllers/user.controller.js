@@ -42,14 +42,17 @@ const registerUser = asyncHandler(async (req, res) => {
     }
 
     const avatarLocalPath = req.files?.avatar[0]?.path;
+
     let coverImageLocalPath;
-    if (req.files && Array.isArray(req.files.coverImage) && req.files.coverImage[0] > 0) {
-        coverImageLocalPath = req.files.coverImage[0].path
+
+    if (req.files && Array.isArray(req.files.coverImage)) {
+        coverImageLocalPath = await req.files.coverImage[0].path
     }
 
     if (!avatarLocalPath) {
         throw new ApiError(400, "Avatar is required")
     }
+
     const avatar = await cloudnaryUpload(avatarLocalPath);
     const coverImage = await cloudnaryUpload(coverImageLocalPath);
 
@@ -304,11 +307,31 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Cover image file is missing")
     }
 
-    const coverImage = await uploadCloudinary(coverImageLocalPath)
+    const coverImage = await cloudnaryUpload(coverImageLocalPath)
 
     if (!coverImage.url) {
         throw new ApiError(400, "Error while uploading on cover image")
     }
+
+    const userUrl = await User.findById(req.user?._id)
+
+    let urlSeperator = []
+    let url = userUrl.coverImage
+    let urlWord = ''
+    for (let i = 0; i < url.length; i++) {
+        if (url[i] == '/') {
+            urlSeperator.push(urlWord)
+            urlWord = ''
+        }
+        else if (url[i] == '.') {
+            urlSeperator.push(urlWord)
+        }
+        else {
+            urlWord += url[i]
+        }
+    }
+
+    await cloudnaryDelete(urlSeperator[urlSeperator.length - 1])
 
     const user = await User.findByIdAndUpdate(
         req.user?._id,
