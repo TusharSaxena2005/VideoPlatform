@@ -5,6 +5,8 @@ import { cloudnaryUpload, cloudnaryDelete } from "../utils/cloudnary.js"
 import { ApiResponse } from "../utils/apiResponse.js"
 import jwt from "jsonwebtoken"
 import mongoose from "mongoose"
+import { deleteFile } from "../middleware/multer.middleware.js"
+
 
 
 const generateAccessAndRefreshToken = async (userId) => {
@@ -33,14 +35,11 @@ const registerUser = asyncHandler(async (req, res) => {
         throw new ApiError(400, "All field are required")
     }
 
+
     const existedUser = await User.findOne({
         $or: [{ email }, { username }]
     })
-
-    if (existedUser) {
-        throw new ApiError(409, "User with this email or username already exist")
-    }
-
+    
     const avatarLocalPath = req.files?.avatar[0]?.path;
 
     let coverImageLocalPath;
@@ -48,6 +47,13 @@ const registerUser = asyncHandler(async (req, res) => {
     if (req.files && Array.isArray(req.files.coverImage)) {
         coverImageLocalPath = await req.files.coverImage[0].path
     }
+
+    if (existedUser) {
+        deleteFile(avatarLocalPath);
+        deleteFile(coverImageLocalPath);
+        throw new ApiError(409, "User with this email or username already exist")
+    }
+
 
     if (!avatarLocalPath) {
         throw new ApiError(400, "Avatar is required")
@@ -77,15 +83,17 @@ const registerUser = asyncHandler(async (req, res) => {
         throw new ApiError(500, "Something went wrong while registering the user")
     }
 
-    return res.status(201).json(
-        new ApiResponse(200, userCreated, "user registered Successfully")
-    )
+    return res
+        .status(201)
+        .json(
+            new ApiResponse(200, userCreated, "user registered Successfully")
+        )
 
 })
 
 const loginUser = asyncHandler(async (req, res) => {
     const { username, email, password } = req.body
-    if (!(username || email)) {
+    if (!username && !email) {
         throw new ApiError(400, "username and email are required")
     }
 
@@ -162,7 +170,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
         if (!incomingRefreshToken) {
             throw new ApiError(401, "Unauthorized request")
         }
-        const decodedToken = jwt.verify(incomingRefreshToken, process.env.ACCESS_TOKEN_SECRET)
+        const decodedToken = jwt.verify(incomingRefreshToken, process.env.REFRESH_TOKEN_SECRET)
 
         const user = await User.findById(decodedToken?._id)
 
@@ -227,7 +235,7 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 const updateAccount = asyncHandler(async (req, res) => {
     const { fullName, email } = req.body
 
-    if (!fullName || !email) {
+    if (!fullName && !email) {
         throw new ApiError(400, "Please provide all fields")
     }
 
@@ -246,7 +254,7 @@ const updateAccount = asyncHandler(async (req, res) => {
     return res
         .status(200)
         .json(
-            200, user, "User detail are updated"
+            new ApiResponse(200, req.user, "User details are updated")
         )
 })
 
