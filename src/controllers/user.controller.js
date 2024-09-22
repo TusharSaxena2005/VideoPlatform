@@ -1,10 +1,10 @@
+import mongoose from "mongoose"
+import jwt from "jsonwebtoken"
 import { asyncHandler } from "../utils/asyncHandler.js"
 import { ApiError } from "../utils/apiError.js"
+import { ApiResponse } from "../utils/apiResponse.js"
 import { User } from "../models/user.model.js"
 import { cloudnaryUpload, cloudnaryDelete } from "../utils/cloudnary.js"
-import { ApiResponse } from "../utils/apiResponse.js"
-import jwt from "jsonwebtoken"
-import mongoose from "mongoose"
 import { deleteFile } from "../middleware/multer.middleware.js"
 
 
@@ -39,7 +39,7 @@ const registerUser = asyncHandler(async (req, res) => {
     const existedUser = await User.findOne({
         $or: [{ email }, { username }]
     })
-    
+
     const avatarLocalPath = req.files?.avatar[0]?.path;
 
     let coverImageLocalPath;

@@ -17,19 +17,20 @@ const cloudnaryUpload = async (localPath) => {
                 resource_type: "auto",
             }
         )
-        // console.log("File has been uploaded on Cloudnary successfully", response.url);
         fs.unlinkSync(localPath)
         return response;
     } catch (error) {
-        fs.unlink(localPath);
+        fs.unlink(localPath, (err) => {
+            if (err) console.error(err);
+        });
         return null;
     }
 }
 
 const cloudnaryDelete = async (localPath) => {
-    cloudinary.uploader.destroy(localPath, function (result) { 
+    cloudinary.uploader.destroy(localPath, function (result) {
         console.log("Image successfully deletd from cloudnary")
-     });
+    });
 }
 
 
