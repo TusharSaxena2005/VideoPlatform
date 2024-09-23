@@ -6,6 +6,9 @@ import { upload } from "../middleware/multer.middleware.js";
 const videoRouter = Router();
 videoRouter.use(VerifyJWT);
 
+
+videoRouter.route("/getAllVideos").get(getAllVideos)
+
 videoRouter.route("/publishAVideo").post(
     upload.fields([
         {

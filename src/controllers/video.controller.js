@@ -5,11 +5,20 @@ import { ApiError } from "../utils/apiError.js"
 import { ApiResponse } from "../utils/apiResponse.js"
 import { asyncHandler } from "../utils/asyncHandler.js"
 import { cloudnaryUpload, cloudnaryDelete } from "../utils/cloudnary.js"
+import { query } from "express";
 
 
 const getAllVideos = asyncHandler(async (req, res) => {
-    const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query
+    const { page = 1, limit = 1, query, sortBy, sortType, userId } = req.query
     //TODO: get all videos based on query, sort, pagination
+    const offset = (page - 1) * limit
+    const video = await Video.find({ owner: userId, title: sortBy }).skip(offset).limit(limit);
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(200, video, "running")
+        )
 })
 
 const publishAVideo = asyncHandler(async (req, res) => {
@@ -28,31 +37,31 @@ const publishAVideo = asyncHandler(async (req, res) => {
     }
 
 
-    
+
     const videoFileLocalPath = req.files?.videoFile[0].path;
     const thumbnailLocalPath = req.files?.thumbnail[0].path;
-    
-    
+
+
     if (!videoFileLocalPath || !thumbnailLocalPath) {
         throw new ApiError(400, "Video file and Thumbnail required")
     }
-    
+
     const videoFile = await cloudnaryUpload(videoFileLocalPath);
     const thumbnail = await cloudnaryUpload(thumbnailLocalPath);
-    
+
     if (!videoFile || !thumbnail) {
         throw new ApiError(500, "Video or thumbail not uploaded")
     }
-    
+
     const video = await Video.create({
         title,
         description,
         videoFile: videoFile.url,
         thumbnail: thumbnail.url,
-        duration:videoFile.duration,
+        duration: videoFile.duration,
         owner: user
     })
-    
+
     const videoPublished = await Video.findById(video._id)
 
     if (!videoPublished) {
