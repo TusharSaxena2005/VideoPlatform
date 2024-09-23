@@ -23,6 +23,9 @@ videoRouter.route("/publishAVideo").post(
     publishAVideo
 )
 
+videoRouter.route("/getVideoById").get(getVideoById)
+
+
 
 
 export { videoRouter }

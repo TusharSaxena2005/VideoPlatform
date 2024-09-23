@@ -14,10 +14,14 @@ const getAllVideos = asyncHandler(async (req, res) => {
     const offset = (page - 1) * limit
     const video = await Video.find({ owner: userId, title: sortBy }).skip(offset).limit(limit);
 
+    if(!video){
+        return new ApiError(404, "Video not found");
+    }
+
     return res
         .status(200)
         .json(
-            new ApiResponse(200, video, "running")
+            new ApiResponse(200, video, "All videos created by this owner fetched")
         )
 })
 
@@ -79,6 +83,13 @@ const publishAVideo = asyncHandler(async (req, res) => {
 const getVideoById = asyncHandler(async (req, res) => {
     const { videoId } = req.params
     //TODO: get video by id
+    const video = await Video.findById(videoId)
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(200, video, "Video found")
+    )
 })
 
 const updateVideo = asyncHandler(async (req, res) => {
