@@ -14,7 +14,7 @@ const getAllVideos = asyncHandler(async (req, res) => {
     const offset = (page - 1) * limit
     const video = await Video.find({ owner: userId, title: sortBy }).skip(offset).limit(limit);
 
-    if(!video){
+    if (!video) {
         return new ApiError(404, "Video not found");
     }
 
@@ -81,16 +81,25 @@ const publishAVideo = asyncHandler(async (req, res) => {
 })
 
 const getVideoById = asyncHandler(async (req, res) => {
-    const { videoId } = req.params
-    //TODO: get video by id
-    const video = await Video.findById(videoId)
+    const { videoId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(videoId)) {
+        return res.status(400).json(new ApiResponse(400, null, "Invalid video ID"));
+    }
+
+    const video = await Video.findById(videoId);
+
+    if (!video) {
+        return res.status(404).json(new ApiResponse(404, null, "Video not found"));
+    }
 
     return res
-    .status(200)
-    .json(
-        new ApiResponse(200, video, "Video found")
-    )
-})
+        .status(200)
+        .json(
+            new ApiResponse(200, video, "Video found")
+        );
+});
+
 
 const updateVideo = asyncHandler(async (req, res) => {
     const { videoId } = req.params

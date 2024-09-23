@@ -23,7 +23,7 @@ videoRouter.route("/publishAVideo").post(
     publishAVideo
 )
 
-videoRouter.route("/getVideoById").get(getVideoById)
+videoRouter.route("/getVideoById/:videoId").get(getVideoById)
 
 
 
