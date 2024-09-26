@@ -8,7 +8,6 @@ videoRouter.use(VerifyJWT);
 
 
 videoRouter.route("/getAllVideos").get(getAllVideos)
-
 videoRouter.route("/publishAVideo").post(
     upload.fields([
         {
@@ -22,10 +21,10 @@ videoRouter.route("/publishAVideo").post(
     ]),
     publishAVideo
 )
-
 videoRouter.route("/getVideoById/:videoId").get(getVideoById)
+videoRouter.route("/updateVideo/:videoId").patch(upload.single('thumbnail'), updateVideo);
 
 
 
 
-export { videoRouter }
+export { videoRouter }  

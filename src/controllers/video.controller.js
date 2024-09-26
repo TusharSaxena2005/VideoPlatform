@@ -15,7 +15,7 @@ const getAllVideos = asyncHandler(async (req, res) => {
     const video = await Video.find({ owner: userId, title: sortBy }).skip(offset).limit(limit);
 
     if (!video) {
-        return new ApiError(404, "Video not found");
+        throw new ApiError(404, "Video not found");
     }
 
     return res
@@ -100,12 +100,103 @@ const getVideoById = asyncHandler(async (req, res) => {
         );
 });
 
-
 const updateVideo = asyncHandler(async (req, res) => {
-    const { videoId } = req.params
     //TODO: update video details like title, description, thumbnail
+    const { videoId } = req.params;
+    const { title, description } = req.body;
+    const thumbnailLocalPath = req.file?.path;
 
-})
+    if (!videoId) {
+        throw new ApiError(400, "Video id not found")
+    }
+    if (!title && !description && !thumbnailLocalPath) {
+        return res.status(400).json({ message: 'No fields to update' });
+    }
+
+    if (!(title || description)) {
+        throw new ApiError(400, "No fields to update")
+    }
+
+    let video;
+
+    if (thumbnailLocalPath) {
+
+        video = await Video.findById(videoId);
+
+        if (!video) {
+            throw new ApiError(400, "Video not found")
+        }
+
+        let urlSeperator = []
+        let url = video.thumbnail
+        let urlWord = ''
+        for (let i = 0; i < url.length; i++) {
+            if (url[i] == '/') {
+                urlSeperator.push(urlWord)
+                urlWord = ''
+            }
+            else if (url[i] == '.') {
+                urlSeperator.push(urlWord)
+            }
+            else {
+                urlWord += url[i]
+            }
+        }
+        try {
+            await cloudnaryDelete(urlSeperator[urlSeperator.length - 1])
+
+        } catch (error) {
+
+            throw new ApiError(500, "Failed to delete old thumbnail")
+        }
+
+        try {
+            const thumbnail = await cloudnaryUpload(thumbnailLocalPath)
+            video = await Video.findByIdAndUpdate(
+                videoId,
+                {
+                    $set: {
+                        title,
+                        description,
+                        thumbnail: thumbnail.url
+                    }
+                },
+                {
+                    new: true
+                }
+            );
+
+        } catch (error) {
+            throw new ApiError(500, "Failed to upload new thumbnail")
+        }
+
+
+    } else {
+        video = await Video.findByIdAndUpdate(
+            videoId,
+            {
+                $set: {
+                    title,
+                    description
+                }
+            },
+            {
+                new: true
+            }
+        );
+    }
+
+    if (!video) {
+        throw new ApiError(500, "Data not updated");
+    }
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(200, video, "running")
+        );
+});
+
 
 const deleteVideo = asyncHandler(async (req, res) => {
     const { videoId } = req.params
