@@ -23,6 +23,7 @@ videoRouter.route("/publishAVideo").post(
 )
 videoRouter.route("/getVideoById/:videoId").get(getVideoById)
 videoRouter.route("/updateVideo/:videoId").patch(upload.single('thumbnail'), updateVideo);
+videoRouter.route("/deleteVideo/:videoId").get(deleteVideo);
 
 
 
