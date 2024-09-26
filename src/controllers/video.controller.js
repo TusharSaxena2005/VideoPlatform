@@ -83,6 +83,10 @@ const publishAVideo = asyncHandler(async (req, res) => {
 const getVideoById = asyncHandler(async (req, res) => {
     const { videoId } = req.params;
 
+    if (!isValidObjectId(videoId)) {
+        throw new ApiError(400, "Invalid Video id")
+    }
+
     if (!mongoose.Types.ObjectId.isValid(videoId)) {
         return res.status(400).json(new ApiResponse(400, null, "Invalid video ID"));
     }
@@ -106,9 +110,10 @@ const updateVideo = asyncHandler(async (req, res) => {
     const { title, description } = req.body;
     const thumbnailLocalPath = req.file?.path;
 
-    if (!videoId) {
-        throw new ApiError(400, "Video id not found")
+    if (!isValidObjectId(videoId)) {
+        throw new ApiError(400, "Invalid Video id")
     }
+
     if (!title && !description && !thumbnailLocalPath) {
         return res.status(400).json({ message: 'No fields to update' });
     }
@@ -197,36 +202,77 @@ const updateVideo = asyncHandler(async (req, res) => {
         );
 });
 
-// completed --->
-
 const deleteVideo = asyncHandler(async (req, res) => {
     const { videoId } = req.params
     //TODO: delete video
-    if(!videoId){
-        throw new ApiError(400, "Video id is required")
+    if (!isValidObjectId(videoId)) {
+        throw new ApiError(400, "Invalid Video id")
     }
-    
+
     const video = await Video.findById(videoId);
-    
-    if(!video){
+
+    if (!video) {
         throw new ApiError(400, "Video not found")
     }
 
     try {
-        await Video.deleteOne({_id:videoId})
+        await Video.deleteOne({ _id: videoId })
     } catch (error) {
-        throw new ApiError(500,"Video not deleted")
+        throw new ApiError(500, "Video not deleted")
     }
 
     return res
-    .status(200)
-    .json(
-        new ApiResponse(200,video,"Video deleted successfully")
-    )
+        .status(200)
+        .json(
+            new ApiResponse(200, video, "Video deleted successfully")
+        )
 })
 
 const togglePublishStatus = asyncHandler(async (req, res) => {
     const { videoId } = req.params
+
+    if (!isValidObjectId(videoId)) {
+        throw new ApiError(400, "Invalid Video id")
+    }
+
+    const video = await Video.findById(videoId)
+
+    if (!video) {
+        throw new ApiError(400, "Video not found")
+    }
+
+    function isPublished(x) {
+        if (x == true) {
+            x = false;
+        } else {
+            x = true;
+        }
+
+        return x;
+    }
+
+    const updatePublishStatue = await Video.findByIdAndUpdate(videoId,
+        {
+            $set: {
+                isPublished: isPublished(video.isPublished)
+            }
+        },
+        {
+            new: true
+        }
+    )
+
+    if (!updatePublishStatue) {
+        throw new ApiError(400, "Video status not changed")
+    }
+
+
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(200, updatePublishStatue, "Public status toggled")
+        )
 })
 
 export {
