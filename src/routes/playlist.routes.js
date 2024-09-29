@@ -7,6 +7,7 @@ const playlistRouter = Router();
 playlistRouter.use(VerifyJWT);
 
 playlistRouter.route("/createPlaylist").post(createPlaylist)
+playlistRouter.route("/userPlaylists/:userId").get(getUserPlaylists)
 
 
 export { playlistRouter }
