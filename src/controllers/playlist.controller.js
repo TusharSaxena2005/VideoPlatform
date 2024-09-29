@@ -1,5 +1,6 @@
 import mongoose, { isValidObjectId } from "mongoose"
 import { Playlist } from "../models/playlist.model.js"
+import { Video } from "../models/video.model.js"
 import { ApiError } from "../utils/apiError.js"
 import { ApiResponse } from "../utils/apiResponse.js"
 import { asyncHandler } from "../utils/asyncHandler.js"
@@ -76,11 +77,37 @@ const getPlaylistById = asyncHandler(async (req, res) => {
         )
 })
 
-//completed -->
 
 const addVideoToPlaylist = asyncHandler(async (req, res) => {
     const { playlistId, videoId } = req.params
+
+    if (!isValidObjectId(playlistId) || !isValidObjectId(videoId)) {
+        throw new ApiError(400, "Invalid playlist id")
+    }
+
+    const playlist = await Playlist.findByIdAndUpdate(playlistId,
+        {
+            $addToSet: {
+                videos: videoId
+            }
+        },
+        {
+            new: true
+        }
+    )
+
+    if (!playlist) {
+        throw new ApiError(500, "Video not added")
+    }
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(200, playlist, "Video successfully added to playlist")
+        )
 })
+
+//completed -->
 
 const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
     const { playlistId, videoId } = req.params

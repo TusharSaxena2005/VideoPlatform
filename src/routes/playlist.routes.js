@@ -9,6 +9,7 @@ playlistRouter.use(VerifyJWT);
 playlistRouter.route("/createPlaylist").post(createPlaylist)
 playlistRouter.route("/userPlaylists/:userId").get(getUserPlaylists)
 playlistRouter.route("/playlistById/:playlistId").get(getPlaylistById)
+playlistRouter.route("/addVideoToPlaylist/:playlistId/:videoId").post(addVideoToPlaylist)
 
 
 export { playlistRouter }
