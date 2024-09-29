@@ -10,6 +10,7 @@ playlistRouter.route("/userPlaylists/:userId").get(getUserPlaylists)
 playlistRouter.route("/playlistById/:playlistId").get(getPlaylistById)
 playlistRouter.route("/addVideoToPlaylist/:playlistId/:videoId").post(addVideoToPlaylist)
 playlistRouter.route("/removeVideoFromPlaylist/:playlistId/:videoId").post(removeVideoFromPlaylist)
+playlistRouter.route("/deletePlaylist/:playlistId").get(deletePlaylist)
 
 
 export { playlistRouter }
