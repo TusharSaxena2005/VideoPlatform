@@ -133,31 +133,55 @@ const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
 const deletePlaylist = asyncHandler(async (req, res) => {
     const { playlistId } = req.params
     // TODO: delete 
-    
-    if(!isValidObjectId(playlistId)){
+
+    if (!isValidObjectId(playlistId)) {
         throw new ApiError(400, "Invalid playlist id")
     }
 
-    const  playlist = await Playlist.findByIdAndDelete(playlistId)
+    const playlist = await Playlist.findByIdAndDelete(playlistId)
 
-    if(!playlist){
-        throw new ApiError(500,"Playlist not deleted")
+    if (!playlist) {
+        throw new ApiError(500, "Playlist not deleted")
     }
 
 
     return res
-    .status(200)
-    .json(
-        new ApiResponse(200,playlist,"Playlist deleted successfully")
-    )
+        .status(200)
+        .json(
+            new ApiResponse(200, playlist, "Playlist deleted successfully")
+        )
 })
-
-//completed -->
 
 const updatePlaylist = asyncHandler(async (req, res) => {
     const { playlistId } = req.params
     const { name, description } = req.body
     //TODO: update playlist
+
+    if (!isValidObjectId(playlistId)) {
+        throw new ApiError(400, "Invalid playlist id")
+    }
+
+    if (!name && !description) {
+        throw new ApiError(400, "name or description not provided")
+    }
+
+    const playlist = await Playlist.findByIdAndUpdate(playlistId,
+        {
+            $set: {
+                name,
+                description
+            }
+        },
+        {
+            new:true
+        }
+    )
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(200, playlist, "Playlist details updated")
+        )
 })
 
 export {
