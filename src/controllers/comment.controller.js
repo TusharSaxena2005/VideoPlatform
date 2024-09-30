@@ -37,7 +37,7 @@ const addComment = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Invalid user or video id")
     }
 
-    if (!comment) {
+    if (comment == "") {
         throw new ApiError(400, "Comment is empty")
     }
 
@@ -64,7 +64,15 @@ const addComment = asyncHandler(async (req, res) => {
 //completed
 
 const updateComment = asyncHandler(async (req, res) => {
+    const { commentId } = req.params
+    const { comment } = req.body
     // TODO: update a comment
+
+    if (!isValidObjectId(commentId)) {
+        throw new ApiError(400, "Invalid comment id")
+    }
+
+    if (!comment)
 })
 
 const deleteComment = asyncHandler(async (req, res) => {
