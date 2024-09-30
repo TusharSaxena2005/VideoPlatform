@@ -1,0 +1,14 @@
+import { Router } from "express";
+import { getVideoComments, addComment, updateComment, deleteComment } from "../controllers/comment.controller.js"
+import { VerifyJWT } from "../middleware/auth.middleware.js";
+
+const commentRouter = Router()
+commentRouter.use(VerifyJWT);
+
+commentRouter.route("/addComment/:userId/:videoId").post(addComment)
+commentRouter.route("/getVideoComments/:videoId").get(getVideoComments)
+commentRouter.route("/updateComment/:videoId").get(updateComment)
+
+
+
+export { commentRouter }
