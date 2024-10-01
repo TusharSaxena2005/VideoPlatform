@@ -61,8 +61,6 @@ const addComment = asyncHandler(async (req, res) => {
         )
 })
 
-//completed
-
 const updateComment = asyncHandler(async (req, res) => {
     const { commentId } = req.params
     const { comment } = req.body
@@ -72,11 +70,41 @@ const updateComment = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Invalid comment id")
     }
 
-    if (!comment)
+    if (comment == "") {
+        throw new ApiError(400, "Comment is empty")
+    }
+
+    const updateComment = await Comment.findByIdAndUpdate(commentId,
+        {
+            $set: {
+                comment
+            }
+        },
+        {
+            new: true
+        }
+    )
+
+    if (!updateComment) {
+        throw new ApiError(500, "Comment not found")
+    }
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(200, updateComment, "Comment updated successfully")
+        )
 })
 
+//completed
+
 const deleteComment = asyncHandler(async (req, res) => {
+    const { commentId } = req.params
     // TODO: delete a comment
+
+    if(!isValidObjectId(commentId)){
+        
+    }
 })
 
 export {

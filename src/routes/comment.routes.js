@@ -8,6 +8,7 @@ commentRouter.use(VerifyJWT);
 commentRouter.route("/addComment/:userId/:videoId").post(addComment)
 commentRouter.route("/getVideoComments/:videoId").get(getVideoComments)
 commentRouter.route("/updateComment/:commentId").patch(updateComment)
+commentRouter.route("/deleteComment/:commentId").get(deleteComment)
 
 
 
