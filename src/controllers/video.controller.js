@@ -5,7 +5,6 @@ import { ApiError } from "../utils/apiError.js"
 import { ApiResponse } from "../utils/apiResponse.js"
 import { asyncHandler } from "../utils/asyncHandler.js"
 import { cloudnaryUpload, cloudnaryDelete } from "../utils/cloudnary.js"
-import { query } from "express";
 
 
 const getAllVideos = asyncHandler(async (req, res) => {

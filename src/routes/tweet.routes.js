@@ -7,6 +7,7 @@ tweetRouter.use(VerifyJWT)
 
 tweetRouter.route("/createTweet/").post(createTweet)
 tweetRouter.route("/UserTweets/:userId").get(getUserTweets)
+tweetRouter.route("/updateTweet/:tweetId").patch(updateTweet)
 
 
 export { tweetRouter }
