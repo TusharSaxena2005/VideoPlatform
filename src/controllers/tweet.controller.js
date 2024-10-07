@@ -7,12 +7,7 @@ import { asyncHandler } from "../utils/asyncHandler.js"
 
 const createTweet = asyncHandler(async (req, res) => {
     //TODO: create tweet
-    const { userId } = req.params
     const { content } = req.body
-
-    if (!isValidObjectId(userId)) {
-        throw new ApiError(400, "Invalid user id")
-    }
 
     if (content.trim == '') {
         throw new ApiError(400, "Tweet can't be empty")
@@ -36,6 +31,23 @@ const createTweet = asyncHandler(async (req, res) => {
 
 const getUserTweets = asyncHandler(async (req, res) => {
     // TODO: get user tweets
+    const { userId } = req.params
+
+    if (!isValidObjectId(userId)) {
+        throw new ApiError(400, "Invalid user id")
+    }
+
+    const tweet = await Tweet.find({ owner: userId });
+
+    if (!tweet) {
+        throw new ApiError(500, "Tweet not found from this user")
+    }
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(200, tweet, "User all tweets fetched successfully")
+        )
 })
 
 const updateTweet = asyncHandler(async (req, res) => {
