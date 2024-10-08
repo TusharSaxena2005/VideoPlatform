@@ -7,6 +7,27 @@ import { asyncHandler } from "../utils/asyncHandler.js"
 import { cloudnaryUpload, cloudnaryDelete } from "../utils/cloudnary.js"
 
 
+function deleteFromCloud(link) {
+    let urlSeperator = []
+    let url = link
+    let urlWord = ''
+    for (let i = 0; i < url.length; i++) {
+        if (url[i] == '/') {
+            urlSeperator.push(urlWord)
+            urlWord = ''
+        }
+        else if (url[i] == '.') {
+            urlSeperator.push(urlWord)
+        }
+        else {
+            urlWord += url[i]
+        }
+    }
+
+    return urlSeperator[urlSeperator.length - 1]
+}
+
+
 const getAllVideos = asyncHandler(async (req, res) => {
     const { page = 1, limit = 1, query, sortBy, sortType, userId } = req.query
     //TODO: get all videos based on query, sort, pagination
@@ -90,7 +111,7 @@ const getVideoById = asyncHandler(async (req, res) => {
         .json(
             new ApiResponse(200, video, "Video found")
         );
-});
+})
 
 const updateVideo = asyncHandler(async (req, res) => {
     //TODO: update video details like title, description, thumbnail
@@ -120,23 +141,8 @@ const updateVideo = asyncHandler(async (req, res) => {
             throw new ApiError(400, "Video not found")
         }
 
-        let urlSeperator = []
-        let url = video.thumbnail
-        let urlWord = ''
-        for (let i = 0; i < url.length; i++) {
-            if (url[i] == '/') {
-                urlSeperator.push(urlWord)
-                urlWord = ''
-            }
-            else if (url[i] == '.') {
-                urlSeperator.push(urlWord)
-            }
-            else {
-                urlWord += url[i]
-            }
-        }
         try {
-            await cloudnaryDelete(urlSeperator[urlSeperator.length - 1])
+            await cloudnaryDelete(deleteFromCloud(video.thumbnail))
 
         } catch (error) {
 
@@ -188,13 +194,25 @@ const updateVideo = asyncHandler(async (req, res) => {
         .json(
             new ApiResponse(200, video, "Video details updated")
         );
-});
+})
 
 const deleteVideo = asyncHandler(async (req, res) => {
     const { videoId } = req.params
     //TODO: delete video
+
     if (!isValidObjectId(videoId)) {
         throw new ApiError(400, "Invalid Video id")
+    }
+
+    const video = await Video.findById(videoId)
+
+    try {
+        await cloudnaryDelete(deleteFromCloud(video.videoFile))
+        await cloudnaryDelete(deleteFromCloud(video.thumbnail))
+
+    } catch (error) {
+
+        throw new ApiError(500, "Failed to delete old thumbnail")
     }
 
     try {
