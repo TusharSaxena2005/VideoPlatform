@@ -20,15 +20,12 @@ const toggleSubscription = asyncHandler(async (req, res) => {
     }
 
     async function subscribe(channelId) {
-        const subscription = await Subscription.create(
+        await Subscription.create(
             {
                 Subscriber: req.user._id,
                 Channel: channelId
             }
         )
-        if (!subscription) {
-            throw new ApiError(404, "Subscription not done")
-        }
     }
 
     const alreadySubcribeOrNot = await Subscription.find({
