@@ -32,15 +32,6 @@ const publishAVideo = asyncHandler(async (req, res) => {
         throw new ApiError(400, "All fields are required")
     }
 
-
-    const user = await User.findById(req.user?._id)
-
-    if (!user) {
-        throw new ApiError(400, "User not found")
-    }
-
-
-
     const videoFileLocalPath = req.files?.videoFile[0].path;
     const thumbnailLocalPath = req.files?.thumbnail[0].path;
 
@@ -62,19 +53,17 @@ const publishAVideo = asyncHandler(async (req, res) => {
         videoFile: videoFile.url,
         thumbnail: thumbnail.url,
         duration: videoFile.duration,
-        owner: user
+        owner: req.user?._id
     })
 
-    const videoPublished = await Video.findById(video._id)
-
-    if (!videoPublished) {
+    if (!video) {
         throw new ApiError(500, "Video not published")
     }
 
     return res
         .status(200)
         .json(
-            new ApiResponse(200, videoPublished, "Video published successfully")
+            new ApiResponse(200, video, "Video published successfully")
         )
 
 })
@@ -208,12 +197,6 @@ const deleteVideo = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Invalid Video id")
     }
 
-    const video = await Video.findById(videoId);
-
-    if (!video) {
-        throw new ApiError(400, "Video not found")
-    }
-
     try {
         await Video.deleteOne({ _id: videoId })
     } catch (error) {
@@ -223,7 +206,7 @@ const deleteVideo = asyncHandler(async (req, res) => {
     return res
         .status(200)
         .json(
-            new ApiResponse(200, video, "Video deleted successfully")
+            new ApiResponse(200, "Video deleted successfully")
         )
 })
 
@@ -250,7 +233,7 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
         return x;
     }
 
-    const updatePublishStatue = await Video.findByIdAndUpdate(videoId,
+    const updatePublishStatus = await Video.findByIdAndUpdate(videoId,
         {
             $set: {
                 isPublished: isPublished(video.isPublished)
@@ -261,16 +244,14 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
         }
     )
 
-    if (!updatePublishStatue) {
+    if (!updatePublishStatus) {
         throw new ApiError(400, "Video status not changed")
     }
-
-
 
     return res
         .status(200)
         .json(
-            new ApiResponse(200, updatePublishStatue, "Public status toggled")
+            new ApiResponse(200, updatePublishStatus, "Public status toggled")
         )
 })
 
