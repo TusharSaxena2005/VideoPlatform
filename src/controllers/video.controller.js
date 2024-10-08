@@ -4,7 +4,7 @@ import { User } from "../models/user.model.js"
 import { ApiError } from "../utils/apiError.js"
 import { ApiResponse } from "../utils/apiResponse.js"
 import { asyncHandler } from "../utils/asyncHandler.js"
-import { cloudnaryUpload, cloudnaryDelete } from "../utils/cloudnary.js"
+import { cloudnaryUpload, cloudnaryDelete, cloudnaryDeleteVideo } from "../utils/cloudnary.js"
 
 
 function deleteFromCloud(link) {
@@ -207,7 +207,7 @@ const deleteVideo = asyncHandler(async (req, res) => {
     const video = await Video.findById(videoId)
 
     try {
-        await cloudnaryDelete(deleteFromCloud(video.videoFile))
+        await cloudnaryDeleteVideo(deleteFromCloud(video.videoFile))
         await cloudnaryDelete(deleteFromCloud(video.thumbnail))
 
     } catch (error) {

@@ -33,5 +33,11 @@ const cloudnaryDelete = async (localPath) => {
     });
 }
 
+const cloudnaryDeleteVideo = async (localPath) => {
+    cloudinary.uploader.destroy(localPath, { resource_type: "video" }, function (result) {
+        console.log("Video successfully deletd from cloudnary")
+    });
+}
 
-export { cloudnaryUpload, cloudnaryDelete }
+
+export { cloudnaryUpload, cloudnaryDelete, cloudnaryDeleteVideo }

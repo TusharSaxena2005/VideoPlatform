@@ -29,11 +29,11 @@ const getVideoComments = asyncHandler(async (req, res) => {
 })
 
 const addComment = asyncHandler(async (req, res) => {
-    const { userId, videoId } = req.params
+    const {videoId } = req.params
     const { comment } = req.body
     // TODO: add a comment to a video
 
-    if (!isValidObjectId(userId) && !isValidObjectId(videoId)) {
+    if (!isValidObjectId(videoId)) {
         throw new ApiError(400, "Invalid user or video id")
     }
 
@@ -45,7 +45,7 @@ const addComment = asyncHandler(async (req, res) => {
         {
             comment,
             video: videoId,
-            owner: userId
+            owner: req.user._id
         }
     )
 

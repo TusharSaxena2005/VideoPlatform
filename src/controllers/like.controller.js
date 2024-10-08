@@ -149,7 +149,7 @@ const getLikedVideos = asyncHandler(async (req, res) => {
         likedBy: req.user._id,
         comment: null,
         tweet: null
-    })
+    }).select('video likedBy')
 
     if (!LikedVideos) {
         throw new ApiError(500, "Liked videos not found")
@@ -169,7 +169,7 @@ const getLikedComments = asyncHandler(async (req, res) => {
         likedBy: req.user._id,
         video: null,
         tweet: null
-    })
+    }).select('comment likedBy')
 
     if (!LikedComments) {
         throw new ApiError(500, "Liked comments not found")
@@ -189,7 +189,7 @@ const getLikedTweets = asyncHandler(async (req, res) => {
         likedBy: req.user._id,
         video: null,
         comment: null
-    })
+    }).select('tweet likedBy')
 
     if (!LikedTweets) {
         throw new ApiError(500, "Liked Tweets not found")
